@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/lizrice/secure-connections/utils"
+	"utils"
 )
 
 func main() {
 	client := getClient()
-	resp, err := client.Get("https://liz-server:8080")
+	resp, err := client.Get("https://mbp2019.local:8080")
 	must(err)
 
 	defer resp.Body.Close()
@@ -24,7 +24,11 @@ func main() {
 }
 
 func getClient() *http.Client {
-	cp := x509.NewCertPool()
+	cp, err := x509.SystemCertPool()
+	if err != nil {
+			fmt.Println("SystemCertPool")
+	}
+
 	data, _ := ioutil.ReadFile("../ca/minica.pem")
 	cp.AppendCertsFromPEM(data)
 
@@ -51,18 +55,3 @@ func must(err error) {
 		os.Exit(1)
 	}
 }
-
-// fmt.Println("Certificate authority:")
-// must(utils.OutputPEMFile("../ca/cert"))
-// cp, _ := x509.SystemCertPool() or
-// cp := x509.NewCertPool()
-// data, _ := ioutil.ReadFile("../ca/cert")
-// cp.AppendCertsFromPEM(data)
-
-// fmt.Println("My certificate:")
-// must(utils.OutputPEMFile("signed-cert"))
-// c, _ := tls.LoadX509KeyPair("signed-cert", "key")
-
-// InsecureSkipVerify: true,
-// RootCAs:               cp,
-// Certificates:          []tls.Certificate{c},
